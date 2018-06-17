@@ -1,23 +1,50 @@
 package kvirtualdom
 
-data class VirtualNode(
+sealed class VirtualNode
+
+data class TagNode(
         val tag: String,
-        val attrs: Attributes,
-        val children: List<VirtualNode>
-)
+        val attrs: Attrs = attrs(),
+        val children: List<VirtualNode> = emptyList()
+) : VirtualNode()
 
-data class Attributes(val id: String? = null, val classes: Set<String> = emptySet()) : HashMap<String, String>()
+data class TextNode(val content: String) : VirtualNode()
 
-fun tag(tagDef: String, children: List<VirtualNode>): VirtualNode {
-    return tag(tagDef, children = children)
+data class Attrs(val id: String? = null, val classes: Set<String> = emptySet(), val others: Map<String, String> = emptyMap())
+
+fun attrs(vararg others: Pair<String, String>): Attrs {
+    return attrs(others = others.toMap())
 }
 
-fun tag(tagDef: String, properties: Attributes = Attributes(), children: List<VirtualNode> = emptyList()): VirtualNode {
-    val (tagName, attributes) = parseTag(tagDef, properties)
-    return VirtualNode(tagName, attributes, children.map { tag(it.tag, it.attrs, it.children) })
+fun attrs(classes: Set<String> = emptySet()): Attrs {
+    return attrs(null, classes)
 }
 
-fun parseTag(tagDef: String, properties: Attributes): Pair<String, Attributes> {
+fun attrs(id: String? = null, classes: Set<String> = emptySet(), others: Map<String, String> = emptyMap()): Attrs {
+    return Attrs(id, classes, others)
+}
+
+fun tag(tagDef: String, vararg children: VirtualNode): VirtualNode {
+    return tag(tagDef, attrs = attrs(), children = *children)
+}
+
+fun text(content: String): TextNode = TextNode(content)
+
+fun tag(tagDef: String, attrs: Attrs, vararg children: VirtualNode): VirtualNode {
+    val (tagName, attributes) = parseTag(tagDef, attrs)
+    return TagNode(tagName, attributes, parseChildren(children.toList()))
+}
+
+private fun parseChildren(children: List<VirtualNode>): List<VirtualNode> {
+    return children.map { child ->
+        when (child) {
+            is TextNode -> child
+            is TagNode -> tag(child.tag, child.attrs, *child.children.toTypedArray())
+        }
+    }
+}
+
+fun parseTag(tagDef: String, attrs: Attrs): Pair<String, Attrs> {
     fun isClass(str: String) = str.startsWith(".")
     fun isId(str: String) = str.startsWith("#")
     fun removeSign(str: String) = str.substring(1)
@@ -28,8 +55,8 @@ fun parseTag(tagDef: String, properties: Attributes): Pair<String, Attributes> {
 
     val parts = splitToParts(tagDef)
     val tag = findProvidedTagName(parts) ?: "div"
-    val id = findId(parts) ?: properties.id
-    val classes = findClasses(parts) + properties.classes
-    return tag to properties.copy(id = id, classes = classes)
+    val id = findId(parts) ?: attrs.id
+    val classes = findClasses(parts) + attrs.classes
+    return tag to attrs.copy(id = id, classes = classes)
 }
 
