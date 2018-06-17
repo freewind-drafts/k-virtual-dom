@@ -2,43 +2,34 @@ package kvirtualdom
 
 data class VirtualNode(
         val tag: String,
-        val props: Map<String, String>,
-        val childNodes: List<VirtualNode>,
-        val key: String,
-        val namespace: String
+        val attrs: Attributes,
+        val children: List<VirtualNode>
 )
 
+data class Attributes(val id: String? = null, val classes: Set<String> = emptySet()) : HashMap<String, String>()
 
-fun h(tagName: String, children: List<VirtualNode>) {
-    h(tagName, children = children)
+fun tag(tagDef: String, children: List<VirtualNode>): VirtualNode {
+    return tag(tagDef, children = children)
 }
 
-fun h(tagName: String, properties: Map<String, String>, children: List<VirtualNode> = emptyList()) {
-    val tag = parseTag(tagName, properties)
-
+fun tag(tagDef: String, properties: Attributes = Attributes(), children: List<VirtualNode> = emptyList()): VirtualNode {
+    val (tagName, attributes) = parseTag(tagDef, properties)
+    return VirtualNode(tagName, attributes, children.map { tag(it.tag, it.attrs, it.children) })
 }
 
-fun parseTag(tagName: String, properties: Map<String, String>): Pair<String, Map<String, String>> {
+fun parseTag(tagDef: String, properties: Attributes): Pair<String, Attributes> {
     fun isClass(str: String) = str.startsWith(".")
     fun isId(str: String) = str.startsWith("#")
     fun removeSign(str: String) = str.substring(1)
-    val parts = tagName.split("""\b(?=#|[.])""".toRegex()).filterNot { it.isBlank() }
-    println("parts: $parts")
+    fun findClasses(parts: List<String>): Set<String> = parts.filter(::isClass).map(::removeSign).toSet()
+    fun findId(parts: List<String>) = parts.firstOrNull(::isId)?.let(::removeSign)
+    fun findProvidedTagName(parts: List<String>) = parts.filterNot { isId(it) || isClass(it) }.firstOrNull()
+    fun splitToParts(tagName: String) = tagName.split("""\b(?=#|[.])""".toRegex()).filterNot { it.isBlank() }
 
-    val tag = parts.firstOrNull()?.let { tag ->
-        if (isId(tag) || isClass(tag)) "div" else tag
-    } ?: "div"
-
-    val props = properties.toMutableMap()
-    (parts.firstOrNull(::isId)?.let(::removeSign) ?: properties["id"])?.let { id ->
-        props["id"] = id
-    }
-    (parts.filter(::isClass).map(::removeSign) + (properties["class"]?.split("""\s+""".toRegex())?.toList()
-            ?: emptyList()))
-            .joinToString(" ").let { classes ->
-                props["class"] = classes
-            }
-    return tag to props.toMap()
+    val parts = splitToParts(tagDef)
+    val tag = findProvidedTagName(parts) ?: "div"
+    val id = findId(parts) ?: properties.id
+    val classes = findClasses(parts) + properties.classes
+    return tag to properties.copy(id = id, classes = classes)
 }
-
 
