@@ -5,7 +5,7 @@ import org.w3c.dom.events.Event
 sealed class VirtualNode
 
 data class TagNode(
-        val tag: String = "div",
+        val tag: String,
         val id: String? = null,
         val classes: MutableSet<String> = mutableSetOf(),
         val props: MutableMap<String, String> = mutableMapOf(),
@@ -15,15 +15,15 @@ data class TagNode(
 
 data class TextNode(val content: String) : VirtualNode()
 
-fun tag(tag: String = "div", id: String? = null, classes: Set<String> = emptySet(), props: Map<String, String> = emptyMap(), more: (TagNode.() -> Unit)? = null): VirtualNode {
+fun tag(tag: String, id: String? = null, classes: Set<String> = emptySet(), props: Map<String, String> = emptyMap(), applyChindren: (TagNode.() -> Unit)? = null): VirtualNode {
     val node = TagNode(tag, id, classes.toMutableSet(), props.toMutableMap())
-    if (more != null) node.more()
+    if (applyChindren != null) node.applyChindren()
     return node
 }
 
-fun TagNode.tag(tag: String = "div", id: String? = null, classes: Set<String> = emptySet(), props: Map<String, String> = emptyMap(), more: (TagNode.() -> Unit)? = null) {
+fun TagNode.tag(tag: String, id: String? = null, classes: Set<String> = emptySet(), props: Map<String, String> = emptyMap(), applyChindren: (TagNode.() -> Unit)? = null) {
     val newNode = TagNode(tag, id, classes.toMutableSet(), props.toMutableMap())
-    if (more != null) newNode.more()
+    if (applyChindren != null) newNode.applyChindren()
     this.children.add(newNode)
 }
 
