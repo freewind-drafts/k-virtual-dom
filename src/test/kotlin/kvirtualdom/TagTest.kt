@@ -35,7 +35,7 @@ class TagTest {
 
     @Test
     fun nested_complex_tags() {
-        val onClick = { event: Event -> println("clicked") }
+        val onClick = { event: Event -> println("clicked event: $event") }
         val tags = let {
             tag("div", id = "main1", classes = setOf("big", "panel"), props = mapOf("style" to "color: red")) {
                 props["p1"] = "v1"
