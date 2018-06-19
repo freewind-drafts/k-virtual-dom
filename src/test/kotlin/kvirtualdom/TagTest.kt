@@ -10,7 +10,7 @@ class TagTest {
 
     @Test
     fun nested_simple_tags() {
-        val tags = let {
+        val tags = run {
             tag("div") {
                 text("login")
                 tag("form") {
@@ -20,7 +20,7 @@ class TagTest {
                 }
             }
         }
-        val nodes = let {
+        val nodes = run {
             TagNode("div", children = mutableListOf(
                     TextNode("login"),
                     TagNode("form", children = mutableListOf(
@@ -36,7 +36,7 @@ class TagTest {
     @Test
     fun nested_complex_tags() {
         val onClick = { event: Event -> println("clicked event: $event") }
-        val tags = let {
+        val tags = run {
             tag("div", id = "main1", classes = setOf("big", "panel"), props = mapOf("style" to "color: red")) {
                 props["p1"] = "v1"
                 classes.add("c1")
@@ -50,7 +50,7 @@ class TagTest {
                 }
             }
         }
-        val nodes = let {
+        val nodes = run {
             TagNode("div", id = "main1", classes = mutableSetOf("big", "panel", "c1"), props = mutableMapOf("style" to "color: red", "p1" to "v1"), onEvents = mutableMapOf("click" to onClick), children = mutableListOf(
                     TextNode("login"),
                     TagNode("form", classes = mutableSetOf("my-form"), children = mutableListOf(
