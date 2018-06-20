@@ -11,7 +11,7 @@ data class TagNode(
         val tag: String,
         val id: String? = null,
         val key: String? = null,
-        val classes: MutableSet<String> = mutableSetOf(),
+        val classes: MutableList<String> = mutableListOf(),
         val props: MutableMap<String, String> = mutableMapOf(),
         val onEvents: MutableMap<String, (Event) -> Unit> = mutableMapOf(),
         val children: MutableList<VirtualNode> = mutableListOf()
@@ -19,14 +19,14 @@ data class TagNode(
 
 data class TextNode(val content: String) : VirtualNode()
 
-fun tag(tag: String, id: String? = null, key: String? = null, classes: Set<String> = emptySet(), props: Map<String, String> = emptyMap(), applyChildren: (TagNode.() -> Unit)? = null): VirtualNode {
-    val node = TagNode(tag, id, key, classes.toMutableSet(), props.toMutableMap())
+fun tag(tag: String, id: String? = null, key: String? = null, classes: List<String> = emptyList(), props: Map<String, String> = emptyMap(), applyChildren: (TagNode.() -> Unit)? = null): VirtualNode {
+    val node = TagNode(tag, id, key, classes.toMutableList(), props.toMutableMap())
     if (applyChildren != null) node.applyChildren()
     return node
 }
 
-fun TagNode.tag(tag: String, id: String? = null, key: String? = null, classes: Set<String> = emptySet(), props: Map<String, String> = emptyMap(), applyChildren: (TagNode.() -> Unit)? = null) {
-    val newNode = TagNode(tag, id, key, classes.toMutableSet(), props.toMutableMap())
+fun TagNode.tag(tag: String, id: String? = null, key: String? = null, classes: List<String> = emptyList(), props: Map<String, String> = emptyMap(), applyChildren: (TagNode.() -> Unit)? = null) {
+    val newNode = TagNode(tag, id, key, classes.toMutableList(), props.toMutableMap())
     if (applyChildren != null) newNode.applyChildren()
     this.children.add(newNode)
 }

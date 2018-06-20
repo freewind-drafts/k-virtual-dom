@@ -37,26 +37,26 @@ class TagTest {
     fun nested_complex_tags() {
         val onClick = { event: Event -> println("clicked event: $event") }
         val tags = run {
-            tag("div", id = "main1", classes = setOf("big", "panel"), props = mapOf("style" to "color: red")) {
+            tag("div", id = "main1", classes = listOf("big", "panel"), props = mapOf("style" to "color: red")) {
                 props["p1"] = "v1"
                 classes.add("c1")
                 onEvents["click"] = onClick
 
                 text("login")
-                tag("form", classes = setOf("my-form")) {
-                    tag("input", classes = setOf("username"), props = mapOf("type" to "text"))
-                    tag("input", classes = setOf("password"), props = mapOf("type" to "password"))
-                    tag("button", classes = setOf("submit", "center"))
+                tag("form", classes = listOf("my-form")) {
+                    tag("input", classes = listOf("username"), props = mapOf("type" to "text"))
+                    tag("input", classes = listOf("password"), props = mapOf("type" to "password"))
+                    tag("button", classes = listOf("submit", "center"))
                 }
             }
         }
         val nodes = run {
-            TagNode("div", id = "main1", classes = mutableSetOf("big", "panel", "c1"), props = mutableMapOf("style" to "color: red", "p1" to "v1"), onEvents = mutableMapOf("click" to onClick), children = mutableListOf(
+            TagNode("div", id = "main1", classes = mutableListOf("big", "panel", "c1"), props = mutableMapOf("style" to "color: red", "p1" to "v1"), onEvents = mutableMapOf("click" to onClick), children = mutableListOf(
                     TextNode("login"),
-                    TagNode("form", classes = mutableSetOf("my-form"), children = mutableListOf(
-                            TagNode("input", classes = mutableSetOf("username"), props = mutableMapOf("type" to "text")),
-                            TagNode("input", classes = mutableSetOf("password"), props = mutableMapOf("type" to "password")),
-                            TagNode("button", classes = mutableSetOf("submit", "center"))
+                    TagNode("form", classes = mutableListOf("my-form"), children = mutableListOf(
+                            TagNode("input", classes = mutableListOf("username"), props = mutableMapOf("type" to "text")),
+                            TagNode("input", classes = mutableListOf("password"), props = mutableMapOf("type" to "password")),
+                            TagNode("button", classes = mutableListOf("submit", "center"))
                     ))
             ))
         }
